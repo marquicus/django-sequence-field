@@ -1,3 +1,4 @@
-from sequence_field.fields import SequenceField
+VERSION = (0, 2, 1,)
+__version__ = '.'.join(map(str, VERSION))
 
-__version__ = '0.1'
+default_app_config = 'sequence_field.apps.SequenceFieldConfig'

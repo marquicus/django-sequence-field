@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 
 def load_class(name):
     components = name.split('.')

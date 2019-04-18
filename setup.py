@@ -1,6 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-description = 'Generic JSON model and form fields.'
+description = 'A Django Field for creating templated sequence strings.'
 
 try:
     with open('README.md') as f:
@@ -9,21 +9,23 @@ except IOError:
     long_description = description
 
 setup(
-    name = 'django-sequence-field',
-    version = '0.1',
-    description = description,
-    author = 'Antonio Ognio',
-    author_email = 'antonio@ognio.com',
-    url = 'https://github.com/gnrfan/django-sequence-field',
-    long_description = long_description,
-    packages = ['sequence_field'],
-    install_requires = ['django >= 1.6'],
-    classifiers = [
-        'Development Status :: 3 - Alpha',
+    name='django-sequence-field',
+    version='0.2.1',
+    description=description,
+    packages=find_packages(),
+    include_package_data=True,
+    author='Antonio Ognio',
+    author_email='antonio@ognio.com',
+    url='https://github.com/gnrfan/django-sequence-field',
+    long_description=long_description,
+    install_requires=['django >= 1.11'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules',
+        'Framework :: Django',
     ],
 )

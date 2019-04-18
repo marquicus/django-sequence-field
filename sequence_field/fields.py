@@ -2,9 +2,9 @@
 
 from django.db import models
 from sequence_field.models import Sequence
-from sequence_field.exceptions import SequenceFieldException
-from sequence_field import settings as sequence_field_settings
+from sequence_field import settings
 from sequence_field import strings
+
 
 class SequenceField(models.TextField):
     """ Stores sequence values based on templates. """
@@ -23,21 +23,15 @@ class SequenceField(models.TextField):
         try:
             self.key = kwargs.pop('key')
         except KeyError:
-            raise SequenceFieldException(
-               strings.SEQUENCE_FIELD_MISSING_KEY 
-            )
+            self.key = settings.SEQUENCE_FIELD_DEFAULT_NAME
 
-        default_pattern = \
-            sequence_field_settings.SEQUENCE_FIELD_DEFAULT_PATTERN
+        default_pattern = settings.SEQUENCE_FIELD_DEFAULT_PATTERN
         self.pattern = kwargs.pop('pattern', default_pattern)
 
-        default_template = Sequence.get_template_by_key(self.key)
+        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
         self.template = kwargs.pop('template', default_template)
 
-        Sequence.create_if_missing(self.key, self.template)
-        
-        default_expanders = \
-            sequence_field_settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS
+        default_expanders = settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS
 
         self.params = kwargs.pop('params', {})
 
@@ -52,15 +46,15 @@ class SequenceField(models.TextField):
         super(SequenceField, self).__init__(*args, **kwargs)
 
     def _next_value(self):
-        seq =  Sequence.create_if_missing(self.key, self.template)
+        seq = Sequence.create_if_missing(self.key, self.template)
         return seq.next_value(self.template, self.params, self.expanders)
-            
 
     def pre_save(self, model_instance, add):
         """
         This is used to ensure that we auto-set values if required.
         See CharField.pre_save
         """
+        # Sequence.create_if_missing(self.key, self.template)
         value = getattr(model_instance, self.attname, None)
         if self.auto and add and not value:
             # Assign a new value for this attribute if required.
@@ -68,20 +62,3 @@ class SequenceField(models.TextField):
             setattr(model_instance, self.attname, sequence_string)
             value = sequence_string
         return value
-
-
-try:
-    # add support for South migrations
-    from south.modelsinspector import add_introspection_rules
-    rules = [
-        (
-            (SequenceField,),
-            [],
-            {
-                'db_type': ['_db_type', {'default': None}]
-            }
-        )
-    ]
-    add_introspection_rules(rules, ['^sequence_field\.fields\.SequenceField'])
-except ImportError:
-    pass

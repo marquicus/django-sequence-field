@@ -4,6 +4,12 @@ from django.conf import settings
 from sequence_field import constants
 
 
+SEQUENCE_FIELD_DEFAULT_NAME = getattr(
+    settings,
+    'SEQUENCE_FIELD_DEFAULT_VALUE',
+    constants.SEQUENCE_DEFAULT_NAME
+)
+
 SEQUENCE_FIELD_DEFAULT_VALUE = getattr(
     settings,
     'SEQUENCE_FIELD_DEFAULT_VALUE',

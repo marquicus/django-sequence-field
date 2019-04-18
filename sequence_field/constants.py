@@ -1,5 +1,7 @@
 # Sequence Field constants
 
+SEQUENCE_DEFAULT_NAME = 'default.sequence'
+
 SEQUENCE_KEY_LENGTH = 128
 
 SEQUENCE_TEMPLATE_LENGTH = 128
