@@ -1,0 +1,2 @@
+django<=2.1
+-e /soft/SANDBOX/python/django/forks/django-sequence-field
