@@ -4,6 +4,7 @@ from sequence_field import utils
 from sequence_field import strings
 from sequence_field import constants
 from sequence_field import settings as sequence_field_settings
+from django.utils import timezone
 
 
 class Sequence(models.Model):
@@ -42,23 +43,27 @@ class Sequence(models.Model):
     def __str__(self):
         return self.key
 
-    def increment(self, commit=True):
+    def increment(self, reset_counter=False, commit=True):
+        if reset_counter:
+            diff = (timezone.localtime() - self.updated).days  # TODO test on USE_TZ True/False
+            if diff > 0:
+                self.value = 0
         self.value += 1
         if commit:
             self.save()
 
-    def next_value(self, template=None, params=None, expanders=None, commit=True):
+    def next_value(self, template=None, params=None, expanders=None, reset_counter=False, commit=True):
 
         default_template = self.template
 
         default_expanders = sequence_field_settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS
 
         count = self.value
-        template = template if template is not None else default_template
+        template = template if template is not None else default_template  # redundant
         params = params if params is not None else {}
         expanders = expanders if expanders is not None else default_expanders
         if commit:
-            self.increment()
+            self.increment(reset_counter)
         return utils.expand(template, count, params, expanders=expanders)
 
     @classmethod

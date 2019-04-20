@@ -14,40 +14,27 @@ class SequenceField(models.TextField):
     def __init__(self, *args, **kwargs):
         self.default_error_messages = {
             'invalid': strings.SEQUENCE_FIELD_PATTERN_MISMATCH
-        }
-        self._db_type = kwargs.pop('db_type', None)
-        self.evaluate_formfield = kwargs.pop('evaluate_formfield', False)
-
-        self.lazy = kwargs.pop('lazy', True)
-
-        try:
-            self.key = kwargs.pop('key')
-        except KeyError:
-            self.key = settings.SEQUENCE_FIELD_DEFAULT_NAME
-
-        default_pattern = settings.SEQUENCE_FIELD_DEFAULT_PATTERN
-        self.pattern = kwargs.pop('pattern', default_pattern)
-
-        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
-        self.template = kwargs.pop('template', default_template)
-
-        default_expanders = settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS
-
+        }  # Use case?
+        self._db_type = kwargs.pop('db_type', None)  # Use case?
+        self.evaluate_formfield = kwargs.pop('evaluate_formfield', False)  # Use case?
+        self.lazy = kwargs.pop('lazy', True)  # Use case?
+        self.key = kwargs.pop('key', settings.SEQUENCE_FIELD_DEFAULT_NAME)
+        self.pattern = kwargs.pop('pattern', settings.SEQUENCE_FIELD_DEFAULT_PATTERN)
+        self.template = kwargs.pop('template', settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE)
+        self.expanders = kwargs.pop('expanders', settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS)
         self.params = kwargs.pop('params', {})
-
-        self.expanders = kwargs.pop('expanders', default_expanders)
-
-        self.auto = kwargs.pop('auto', False)
+        self.auto = kwargs.pop('auto', False)  # Use case?
+        self.reset_counter = kwargs.pop('reset_counter', False)
 
         kwargs['help_text'] = kwargs.get(
             'help_text', self.default_error_messages['invalid']
-        )
+        )  # Use case?
 
         super(SequenceField, self).__init__(*args, **kwargs)
 
     def _next_value(self):
         seq = Sequence.create_if_missing(self.key, self.template)
-        return seq.next_value(self.template, self.params, self.expanders)
+        return seq.next_value(self.template, self.params, self.expanders, self.reset_counter)
 
     def pre_save(self, model_instance, add):
         """
