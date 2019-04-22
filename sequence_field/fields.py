@@ -25,6 +25,7 @@ class SequenceField(models.TextField):
         self.params = kwargs.pop('params', {})
         self.auto = kwargs.pop('auto', False)  # Use case?
         self.reset_counter = kwargs.pop('reset_counter', False)
+        self.reset_counter_strategy = kwargs.pop('reset_counter_strategy', "daily")
 
         kwargs['help_text'] = kwargs.get(
             'help_text', self.default_error_messages['invalid']
@@ -34,7 +35,14 @@ class SequenceField(models.TextField):
 
     def _next_value(self):
         seq = Sequence.create_if_missing(self.key, self.template)
-        return seq.next_value(self.template, self.params, self.expanders, self.reset_counter)
+        kwargs = {}
+        kwargs["template"] = self.template
+        kwargs["params"] = self.params
+        kwargs["expanders"] = self.expanders
+        kwargs["reset_counter"] = self.reset_counter
+        kwargs["reset_counter_strategy"] = self.reset_counter_strategy
+        kwargs["commit"] = True
+        return seq.next_value(**kwargs)
 
     def pre_save(self, model_instance, add):
         """

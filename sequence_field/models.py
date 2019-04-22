@@ -3,7 +3,7 @@ from django.db.utils import OperationalError
 from sequence_field import utils
 from sequence_field import strings
 from sequence_field import constants
-from sequence_field import settings as sequence_field_settings
+from sequence_field import settings
 from django.utils import timezone
 
 
@@ -17,13 +17,13 @@ class Sequence(models.Model):
 
     value = models.PositiveIntegerField(
         verbose_name=strings.SEQUENCE_VALUE,
-        default=sequence_field_settings.SEQUENCE_FIELD_DEFAULT_VALUE
+        default=settings.SEQUENCE_FIELD_DEFAULT_VALUE
     )
 
     template = models.CharField(
         verbose_name=strings.SEQUENCE_TEMPLATE,
         max_length=constants.SEQUENCE_TEMPLATE_LENGTH,
-        default=sequence_field_settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
+        default=settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
     )
 
     created = models.DateTimeField(
@@ -43,32 +43,37 @@ class Sequence(models.Model):
     def __str__(self):
         return self.key
 
-    def increment(self, reset_counter=False, commit=True):
+    def increment(self, commit=True, **kwargs):
+        def diff_days(d1, d2):
+            return (timezone.localtime() - self.updated).days
+
+        def diff_months(d1, d2):
+            return (d1.year - d2.year) * 12 + d1.month - d2.month
+
+        reset_counter = kwargs.pop('reset_counter', False)
+        reset_counter_strategy = kwargs.pop('reset_counter_strategy', "daily")
         if reset_counter:
-            diff = (timezone.localtime() - self.updated).days  # TODO test on USE_TZ True/False
-            if diff > 0:
-                self.value = 0
+            if reset_counter_strategy == "daily":
+                if diff_days(timezone.localtime(), self.updated) > 0:
+                    self.value = 0
+            elif reset_counter_strategy == "monthly":
+                if diff_months(timezone.localtime(), self.updated) > 0:
+                    self.value = 0
         self.value += 1
         if commit:
             self.save()
 
-    def next_value(self, template=None, params=None, expanders=None, reset_counter=False, commit=True):
-
-        default_template = self.template
-
-        default_expanders = sequence_field_settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS
-
+    def next_value(self, **kwargs):
         count = self.value
-        template = template if template is not None else default_template  # redundant
-        params = params if params is not None else {}
-        expanders = expanders if expanders is not None else default_expanders
-        if commit:
-            self.increment(reset_counter)
+        template = kwargs.pop('template', settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE)
+        params = kwargs.pop('params', {})
+        expanders = kwargs.pop('expanders', settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS)
+        self.increment(**kwargs)
         return utils.expand(template, count, params, expanders=expanders)
 
     @classmethod
     def create_if_missing(cls, key, template=None):
-        default_template = sequence_field_settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
+        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
         try:
             (seq, created) = Sequence.objects.get_or_create(key=key)
             #  If a template is provided the first time it gets stored
@@ -86,7 +91,7 @@ class Sequence(models.Model):
 
     @classmethod
     def get_template_by_key(cls, key):
-        default_template = sequence_field_settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
+        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
         try:
             seq = Sequence.objects.get(key=key)
             return seq.template
