@@ -33,12 +33,12 @@ from my_app.models import TestModel
 obj = TestModel()
 obj.save()
 
-print obj.sequence # 20140703ABC00001
+print(obj.sequence) # 20140703ABC00001
 
 obj = TestModel()
 obj.save()
 
-print obj.sequence # 20140703ABC00002
+print(obj.sequence) # 20140703ABC00002
 ```
 
 An accompaning ```Sequence``` model is used by this app to store the
@@ -51,9 +51,7 @@ code like this:
 
 ```python
 from sequence_field.models import Sequence
-print Sequence.next(
-  'test.sequence.1', template='%Y%m%d%(code)s%NNNNN', params={'code':'XYZ'}
-) # 20140703XYZ00003
+print(Sequence.next('test.sequence.1', template='%Y%m%d%(code)s%NNNNN', params={'code':'XYZ'})) # 20140703XYZ00003
 ```
 
 Templates can also be stored in the database so you don't have to pass them
@@ -111,11 +109,11 @@ SEQUENCE_FIELD_DEFAULT_EXPANDERS # Already mentioned in the previous section.
 Installation from Github
 ========================
 
-```pip install https://github.com/gnrfan/django-sequence-field/zipball/master```
+```pip install https://github.com/marquicus/django-sequence-field/zipball/master```
 
 Add this line to your ```requirements.txt``` file:
 
-```-e git+https://github.com/gnrfan/django-sequence-field.git@HEAD#egg=django-sequence-field```
+```-e git+https://github.com/marquicus/django-sequence-field.git@HEAD#egg=django-sequence-field```
 
 Then just run:
 

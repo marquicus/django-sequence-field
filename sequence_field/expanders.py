@@ -1,4 +1,5 @@
 import re
+import time
 
 
 class BaseExpander(object):
@@ -95,7 +96,6 @@ class ParameterExpander(BaseExpander):
 class TimeExpander(BaseExpander):
 
     def expand(self, template=None, count=None, params={}, value=None):
-        import time
         (template, count, params, value) = self.setvars(
             template, count, params, value
         )
