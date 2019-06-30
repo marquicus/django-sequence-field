@@ -1,3 +1,4 @@
+from string import Template
 import re
 import time
 
@@ -90,7 +91,8 @@ class ParameterExpander(BaseExpander):
         (template, count, params, value) = self.setvars(
             template, count, params, value
         )
-        return value.format(**params)
+        s = Template(value)
+        return s.substitute(**params)
 
 
 class TimeExpander(BaseExpander):
