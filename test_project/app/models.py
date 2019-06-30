@@ -8,7 +8,7 @@ class TestModel(models.Model):
     sequence = SequenceField(
         verbose_name=strings.TESTMODEL_SEQUENCE,
         key='app.test.sequence.1',
-        template='%Y%m%d{code}%NNNNN',
+        template='%Y%m%d${code}%NNNNN',
         params={'code': 'ABC'},
         auto=True
     )

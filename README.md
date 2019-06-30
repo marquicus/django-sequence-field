@@ -16,7 +16,7 @@ class TestModel(models.Model):
 
     sequence = SequenceField(
         key='test.sequence.1',
-        template='%Y%m%d{code}%NNNNN',
+        template='%Y%m%d${code}%NNNNN',
         params={'code':'ABC'},
         auto=True
     )
@@ -51,7 +51,7 @@ code like this:
 
 ```python
 from sequence_field.models import Sequence
-print(Sequence.next('test.sequence.1', template='%Y%m%d{code}%NNNNN', params={'code':'XYZ'})) # 20140703XYZ00003
+print(Sequence.next('test.sequence.1', template='%Y%m%d${code}%NNNNN', params={'code':'XYZ'})) # 20140703XYZ00003
 ```
 
 Templates can also be stored in the database so you don't have to pass them
