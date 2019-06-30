@@ -90,7 +90,7 @@ class ParameterExpander(BaseExpander):
         (template, count, params, value) = self.setvars(
             template, count, params, value
         )
-        return value % params
+        return value.format(**params)
 
 
 class TimeExpander(BaseExpander):
