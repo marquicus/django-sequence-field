@@ -21,7 +21,6 @@ class SequenceField(models.TextField):
         self.key = kwargs.pop('key', settings.SEQUENCE_FIELD_DEFAULT_NAME)
         self.pattern = kwargs.pop('pattern', settings.SEQUENCE_FIELD_DEFAULT_PATTERN)
         self.template = kwargs.pop('template', settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE)
-        self.expanders = kwargs.pop('expanders', settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS)
         self.params = kwargs.pop('params', {})
         self.auto = kwargs.pop('auto', False)  # Use case?
         self.reset_counter = kwargs.pop('reset_counter', False)
@@ -34,22 +33,20 @@ class SequenceField(models.TextField):
         super(SequenceField, self).__init__(*args, **kwargs)
 
     def _next_value(self):
-        seq = Sequence.create_if_missing(self.key, self.template)
         kwargs = {}
+        kwargs["key"] = self.key
         kwargs["template"] = self.template
         kwargs["params"] = self.params
-        kwargs["expanders"] = self.expanders
         kwargs["reset_counter"] = self.reset_counter
         kwargs["reset_counter_strategy"] = self.reset_counter_strategy
         kwargs["commit"] = True
-        return seq.next_value(**kwargs)
+        return Sequence.next(**kwargs)
 
     def pre_save(self, model_instance, add):
         """
         This is used to ensure that we auto-set values if required.
         See CharField.pre_save
         """
-        # Sequence.create_if_missing(self.key, self.template)
         value = getattr(model_instance, self.attname, None)
         if self.auto and add and not value:
             # Assign a new value for this attribute if required.

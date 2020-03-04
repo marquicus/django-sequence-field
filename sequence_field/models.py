@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.utils import OperationalError
 from sequence_field import utils
 from sequence_field import strings
 from sequence_field import constants
@@ -36,13 +35,6 @@ class Sequence(models.Model):
         auto_now=True
     )
 
-    class Meta:
-        verbose_name = strings.SEQUENCE_MODEL_NAME
-        verbose_name_plural = strings.SEQUENCE_MODEL_NAME_PLURAL
-
-    def __str__(self):
-        return self.key
-
     def increment(self, commit=True, **kwargs):
         def diff_days(d1, d2):
             return (timezone.localtime() - self.updated).days
@@ -59,41 +51,31 @@ class Sequence(models.Model):
             elif reset_counter_strategy == "monthly":
                 if diff_months(timezone.localtime(), self.updated) > 0:
                     self.value = 0
+            elif reset_counter_strategy == "yearly":
+                if diff_days(timezone.localtime(), self.updated) > 365:
+                    self.value = 0
         self.value += 1
         if commit:
             self.save()
 
-    def next_value(self, **kwargs):
-        count = self.value
-        template = kwargs.pop('template', settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE)
-        params = kwargs.pop('params', {})
-        expanders = kwargs.pop('expanders', settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS)
-        self.increment(**kwargs)
-        return utils.expand(template, count, params, expanders=expanders)
+    def next_value(self,
+                   template=settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE,
+                   params={},
+                   commit=True, **kwargs):
+        self.increment(commit, **kwargs)
+        return utils.expand(template, self.value, params)
 
     @classmethod
-    def create_if_missing(cls, key, template=None):
-        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
-        try:
-            (seq, created) = Sequence.objects.get_or_create(key=key)
-            #  If a template is provided the first time it gets stored
-            if created and template is not None:
-                seq.template = template if template else default_template
-                seq.save()
-            return seq
-        except OperationalError:
-            return None
+    def next(cls, key,
+             template=settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE,
+             params={},
+             commit=True, **kwargs):
+        seq, _ = Sequence.objects.get_or_create(key=key, defaults={"template": template})
+        return seq.next_value(template, params, commit, **kwargs)
 
-    @classmethod
-    def next(cls, key, template=None, params=None, expanders=None, commit=True):
-        seq = Sequence.create_if_missing(key, template)
-        return seq.next_value(template, params, expanders, commit)
+    class Meta:
+        verbose_name = strings.SEQUENCE_MODEL_NAME
+        verbose_name_plural = strings.SEQUENCE_MODEL_NAME_PLURAL
 
-    @classmethod
-    def get_template_by_key(cls, key):
-        default_template = settings.SEQUENCE_FIELD_DEFAULT_TEMPLATE
-        try:
-            seq = Sequence.objects.get(key=key)
-            return seq.template
-        except (OperationalError, Sequence.DoesNotExist):
-            return default_template
+    def __str__(self):
+        return self.key

@@ -10,7 +10,7 @@ except IOError:
 
 setup(
     name='django-sequence-field',
-    version='0.2.2',
+    version='0.2.3',
     description=description,
     packages=find_packages(),
     include_package_data=True,

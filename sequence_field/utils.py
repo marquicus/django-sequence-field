@@ -1,3 +1,4 @@
+from sequence_field import settings
 
 
 def load_class(name):
@@ -9,8 +10,8 @@ def load_class(name):
     return klass
 
 
-def expand(template, count, params={}, value=None, expanders=[]):
-    for expander_class in expanders:
+def expand(template, count, params={}, value=None):
+    for expander_class in settings.SEQUENCE_FIELD_DEFAULT_EXPANDERS:  # statically controlled in settings
         klass = load_class(expander_class)
         expander = klass(template, count, params, value)
         value = expander.expand()
