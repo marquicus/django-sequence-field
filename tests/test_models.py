@@ -34,6 +34,7 @@ class SequenceTests(TestCase):
                                  template='%Y%m%d${code}%NNNNN',
                                  params={'code': 'XYZ'})
         self.assertEqual(sequence, time.strftime('%Y%m%dXYZ00001'))
+        self.assertEqual(Sequence.objects.get(key='test.sequence.1').__str__(), "test.sequence.1:1")
 
     def test_next_sequence_custom_with_reset_daily(self):
         sequence = Sequence.next('test.sequence.2',
@@ -41,6 +42,7 @@ class SequenceTests(TestCase):
                                  params={'code': 'XYZ'},
                                  reset_counter=True, reset_counter_strategy='daily')
         self.assertEqual(sequence, time.strftime('%Y%m%dXYZ00001'))  # TODO
+        self.assertEqual(Sequence.objects.get(key='test.sequence.2').__str__(), "test.sequence.2:1")
 
     def test_next_sequence_custom_with_reset_montly(self):
         sequence = Sequence.next('test.sequence.3',
@@ -48,6 +50,7 @@ class SequenceTests(TestCase):
                                  params={'code': 'XYZ'},
                                  reset_counter=True, reset_counter_strategy='monthly')
         self.assertEqual(sequence, time.strftime('%Y%m%dXYZ00001'))  # TODO
+        self.assertEqual(Sequence.objects.get(key='test.sequence.3').__str__(), "test.sequence.3:1")
 
     def test_next_sequence_custom_with_reset_yearly(self):
         sequence = Sequence.next('test.sequence.4',
@@ -55,7 +58,7 @@ class SequenceTests(TestCase):
                                  params={'code': 'XYZ'},
                                  reset_counter=True, reset_counter_strategy='yearly')
         self.assertEqual(sequence, time.strftime('%Y%m%dXYZ00001'))  # TODO
-
+        self.assertEqual(Sequence.objects.get(key='test.sequence.4').__str__(), "test.sequence.4:1")
 
 class TASequenceTests(TransactionTestCase):
-    pass
+    pass  # TODO

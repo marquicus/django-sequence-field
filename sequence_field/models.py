@@ -78,4 +78,4 @@ class Sequence(models.Model):
         verbose_name_plural = strings.SEQUENCE_MODEL_NAME_PLURAL
 
     def __str__(self):
-        return self.key
+        return "{}:{}".format(self.key, self.value)
